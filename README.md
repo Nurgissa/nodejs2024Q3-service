@@ -8,7 +8,8 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+# ssh
+git clone git@github.com:Nurgissa/nodejs2024Q3-service.git
 ```
 
 ## Installing NPM modules
