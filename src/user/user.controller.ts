@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 
 interface CreateUserDto {
   login: string;
@@ -33,5 +41,10 @@ export class UserController {
     @Body() upddatePasswordDto: UpdatePasswordDto,
   ): string {
     return `update: ${id} - ${JSON.stringify(upddatePasswordDto)}`;
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string): any {
+    return `delete: ${id}`;
   }
 }
