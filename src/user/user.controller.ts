@@ -3,48 +3,56 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Put,
 } from '@nestjs/common';
-
-interface CreateUserDto {
-  login: string;
-  password: string;
-}
-
-interface UpdatePasswordDto {
-  oldPassword: string; // previous password
-  newPassword: string; // new password
-}
+import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { FindOneParams } from './dto/fine-one-params.dto';
+import { UserDto } from './dto/user.dto';
 
 @Controller('user')
 export class UserController {
+  constructor(private readonly userService: UserService) {}
+
   @Get()
-  findAll(): string {
-    return 'findAll';
+  findAll(): UserDto[] {
+    return this.userService.findAll().map((user) => user.toDto());
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): any {
-    return `findOne: ${id}`;
+  findOne(@Param() params: FindOneParams): UserDto {
+    const user = this.userService.findOneId(params.id);
+    if (!user) {
+      throw new HttpException('NotFoundError', HttpStatus.NOT_FOUND);
+    }
+
+    return user.toDto();
   }
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto): string {
-    return `create ${JSON.stringify(createUserDto)}`;
+  @HttpCode(201)
+  create(@Body() createUserDto: CreateUserDto): UserDto {
+    const user = this.userService.create(createUserDto);
+    return user.toDto();
   }
 
   @Put(':id')
   update(
-    @Param('id') id: string,
-    @Body() upddatePasswordDto: UpdatePasswordDto,
-  ): string {
-    return `update: ${id} - ${JSON.stringify(upddatePasswordDto)}`;
+    @Param() params: FindOneParams,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ): UserDto {
+    return this.userService.update(params.id, updatePasswordDto).toDto();
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): any {
-    return `delete: ${id}`;
+  @HttpCode(204)
+  delete(@Param() params: FindOneParams) {
+    return this.userService.delete(params.id);
   }
 }
