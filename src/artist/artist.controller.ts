@@ -12,7 +12,9 @@ import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { FindOneParams } from './dto/fine-one-params.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('artist')
 @Controller('artist')
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}

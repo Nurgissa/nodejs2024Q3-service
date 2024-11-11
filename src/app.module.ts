@@ -10,6 +10,7 @@ import { RouterModule } from '@nestjs/core';
 import { FavoriteTrackModule } from './favorite/track/favorite-track.module';
 import { FavoriteArtistModule } from './favorite/artist/favorite-artist.module';
 import { FavoriteAlbumModule } from './favorite/album/favorite-album.module';
+import { JsonContentTypeMiddleware } from './json-content-type.middleware';
 
 @Module({
   imports: [
@@ -43,6 +44,6 @@ import { FavoriteAlbumModule } from './favorite/album/favorite-album.module';
     ]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JsonContentTypeMiddleware],
 })
 export class AppModule {}

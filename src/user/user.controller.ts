@@ -10,22 +10,32 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FindOneParams } from './dto/fine-one-params.dto';
 import { UserDto } from './dto/user.dto';
+// import { User } from "./entities/user.entity";
 
+@ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @ApiOperation({ summary: 'List all users' })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
   findAll(): UserDto[] {
     return this.userService.findAll().map((user) => user.toDto());
   }
 
   @Get(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Get user by id',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
   findOne(@Param() params: FindOneParams): UserDto {
     const user = this.userService.findOneId(params.id);
     if (!user) {

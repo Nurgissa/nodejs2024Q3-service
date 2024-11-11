@@ -12,11 +12,14 @@ import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { FindOneParams } from '../artist/dto/fine-one-params.dto';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('album')
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
+  @ApiCreatedResponse({ description: 'Created Successfully' })
   @Post()
   @HttpCode(201)
   create(@Body() createAlbumDto: CreateAlbumDto) {
