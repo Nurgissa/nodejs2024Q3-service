@@ -1,8 +1,8 @@
-import { getRandomId } from '../utils';
+import { getRandomId } from '../../utils';
 import { ForbiddenException } from '@nestjs/common';
-import { UserDto } from './dto/user.dto';
+import { UserDto } from '../dto/user.dto';
 
-export class UserEntity {
+export class User {
   private readonly id: string;
   private readonly login: string;
   private password: string;
