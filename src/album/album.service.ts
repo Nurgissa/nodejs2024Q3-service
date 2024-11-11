@@ -35,7 +35,7 @@ export class AlbumService {
       throw new NotFoundException('Album not found');
     }
     try {
-      album.update(dto.name, dto.year, dto.artistId);
+      album.update({ name: dto.name, year: dto.year, artistId: dto.artistId });
     } catch (e) {
       throw new BadRequestException(e.message);
     }
@@ -50,5 +50,13 @@ export class AlbumService {
     }
 
     return this.#map.delete(id);
+  }
+
+  unlinkAlbums(artistId: string) {
+    for (const album of this.#map.values()) {
+      if (artistId === album.getArtistId()) {
+        album.unlinkArtist();
+      }
+    }
   }
 }

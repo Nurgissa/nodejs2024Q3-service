@@ -36,7 +36,12 @@ export class TrackService {
     }
 
     try {
-      track.update(dto.name, dto.duration, dto.artistId, dto.albumId);
+      track.update({
+        name: dto.name,
+        duration: dto.duration,
+        artistId: dto.artistId,
+        albumId: dto.albumId,
+      });
     } catch (e) {
       throw new BadRequestException(e.message);
     }
@@ -51,5 +56,13 @@ export class TrackService {
     }
 
     return this.#map.delete(id);
+  }
+
+  unlinkTracksByArtist(id: string) {
+    for (const track of this.#map.values()) {
+      if (track.getArtistId() === id) {
+        track.unlinkArtist();
+      }
+    }
   }
 }

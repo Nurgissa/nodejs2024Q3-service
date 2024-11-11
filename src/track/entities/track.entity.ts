@@ -25,12 +25,25 @@ export class Track {
     return this.#id;
   }
 
-  update(
-    name?: string,
-    duration?: number,
-    artistId?: string,
-    albumId?: string,
-  ) {
+  getArtistId() {
+    return this.#artistId;
+  }
+
+  getAlbumId() {
+    return this.#albumId;
+  }
+
+  update({
+    name,
+    duration,
+    artistId,
+    albumId,
+  }: {
+    name?: string;
+    duration?: number;
+    artistId?: string;
+    albumId?: string;
+  }) {
     if (name) {
       this.#name = name;
     }
@@ -49,6 +62,14 @@ export class Track {
       }
       this.#albumId = albumId;
     }
+  }
+
+  unlinkArtist() {
+    this.#artistId = null;
+  }
+
+  unlinkAlbum() {
+    this.#albumId = null;
   }
 
   toDto() {

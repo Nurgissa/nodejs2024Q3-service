@@ -2,10 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
+import { AlbumService } from '../album/album.service';
+import { TrackService } from '../track/track.service';
 
 @Injectable()
 export class ArtistService {
   #map = new Map<string, Artist>();
+
+  constructor(
+    private readonly albumService: AlbumService,
+    private readonly trackService: TrackService,
+  ) {}
 
   create(dto: CreateArtistDto) {
     const artist = new Artist(dto.name, dto.grammy);
@@ -39,6 +46,13 @@ export class ArtistService {
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }
+
+    const artistId = artist.getId();
+
+    this.albumService.unlinkAlbums(artistId);
+
+    this.trackService.unlinkTracksByArtist(artistId);
+
     return this.#map.delete(id);
   }
 }
