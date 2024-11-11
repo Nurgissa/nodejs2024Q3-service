@@ -4,11 +4,13 @@ export class Artist {
   readonly #id: string;
   #name: string;
   #hasWonGrammy: boolean;
+  #liked: boolean;
 
   constructor(name: string, hasWonGrammy: boolean) {
     this.#id = getRandomId();
     this.#name = name;
     this.#hasWonGrammy = hasWonGrammy;
+    this.#liked = false;
   }
 
   getId(): string {
@@ -24,6 +26,18 @@ export class Artist {
     }
 
     return this;
+  }
+
+  like() {
+    this.#liked = true;
+  }
+
+  unlike() {
+    this.#liked = false;
+  }
+
+  isLiked() {
+    return this.#liked;
   }
 
   toDto(): ArtistDto {

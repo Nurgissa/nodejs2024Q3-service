@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
@@ -63,5 +64,25 @@ export class AlbumService {
         album.unlinkArtist();
       }
     }
+  }
+
+  favorite(id: string) {
+    const album = this.#map.get(id);
+    if (!album) {
+      throw new UnprocessableEntityException('Album not found');
+    }
+    album.like();
+  }
+
+  unfavorite(id: string) {
+    const album = this.#map.get(id);
+    if (!album) {
+      throw new UnprocessableEntityException('Album not found');
+    }
+    album.unlike();
+  }
+
+  getFavoriteAlbums() {
+    return Array.from(this.#map.values()).filter((album) => album.isLiked());
   }
 }

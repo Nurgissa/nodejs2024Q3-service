@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
@@ -54,5 +58,25 @@ export class ArtistService {
     this.trackService.unlinkTracksByArtist(artistId);
 
     return this.#map.delete(id);
+  }
+
+  favorite(id: string) {
+    const artist = this.#map.get(id);
+    if (!artist) {
+      throw new UnprocessableEntityException('Artist not found');
+    }
+    artist.like();
+  }
+
+  unfavorite(id: string) {
+    const artist = this.#map.get(id);
+    if (!artist) {
+      throw new UnprocessableEntityException('Artist not found');
+    }
+    artist.unlike();
+  }
+
+  getFavoriteArtist() {
+    return Array.from(this.#map.values()).filter((album) => album.isLiked());
   }
 }

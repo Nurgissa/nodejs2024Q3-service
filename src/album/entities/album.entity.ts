@@ -6,12 +6,14 @@ export class Album {
   #name: string;
   #year: number;
   #artistId: string | null;
+  #liked: boolean;
 
   constructor(name: string, year: number, artistid: string) {
     this.#id = getRandomId();
     this.#name = name;
     this.#year = year;
     this.#artistId = artistid;
+    this.#liked = false;
   }
 
   getId() {
@@ -48,6 +50,18 @@ export class Album {
 
   unlinkArtist() {
     this.#artistId = null;
+  }
+
+  like() {
+    this.#liked = true;
+  }
+
+  unlike() {
+    this.#liked = false;
+  }
+
+  isLiked() {
+    return this.#liked;
   }
 
   toDto(): AlbumDto {
