@@ -6,10 +6,13 @@ import {
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
+import { TrackService } from '../track/track.service';
 
 @Injectable()
 export class AlbumService {
   #map = new Map<string, Album>();
+
+  constructor(private readonly trackService: TrackService) {}
 
   create(dto: CreateAlbumDto) {
     const album = new Album(dto.name, dto.year, dto.artistId);
@@ -48,6 +51,8 @@ export class AlbumService {
     if (!album) {
       throw new NotFoundException('Album not found');
     }
+
+    this.trackService.unlinkTracksByAlbum(id);
 
     return this.#map.delete(id);
   }

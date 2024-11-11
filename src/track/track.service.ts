@@ -65,4 +65,12 @@ export class TrackService {
       }
     }
   }
+
+  unlinkTracksByAlbum(id: string) {
+    for (const track of this.#map.values()) {
+      if (track.getAlbumId() === id) {
+        track.unlinkAlbum();
+      }
+    }
+  }
 }
