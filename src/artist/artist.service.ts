@@ -14,7 +14,7 @@ import e from 'express';
 
 @Injectable()
 export class ArtistService {
-  #map = new Map<string, Artist>();
+  // #map = new Map<string, Artist>();
 
   constructor(
     private readonly albumService: AlbumService,
@@ -30,7 +30,7 @@ export class ArtistService {
 
   async findAll() {
     const artists = await this.artistRepository.findAll();
-    return artists.map((artist) => artist);
+    return artists.map((artist) => artist.toDto());
   }
 
   async findOne(id: string) {
@@ -71,22 +71,23 @@ export class ArtistService {
   }
 
   favorite(id: string) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new UnprocessableEntityException('Artist not found');
-    }
-    artist.like();
+    // const artist = this.#map.get(id);
+    // if (!artist) {
+    //   throw new UnprocessableEntityException('Artist not found');
+    // }
+    // artist.like();
   }
 
   unfavorite(id: string) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new UnprocessableEntityException('Artist not found');
-    }
-    artist.unlike();
+    // const artist = this.#map.get(id);
+    // if (!artist) {
+    //   throw new UnprocessableEntityException('Artist not found');
+    // }
+    // artist.unlike();
   }
 
   getFavoriteArtist() {
-    return Array.from(this.#map.values()).filter((album) => album.isLiked());
+    return [];
+    //return Array.from(this.#map.values()).filter((album) => album.isLiked());
   }
 }

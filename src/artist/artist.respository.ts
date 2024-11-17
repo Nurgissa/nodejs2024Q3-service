@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { IRepository } from '../core/data-access/repository.inteface';
-import { PrismaService } from '../frameworks/data-services/prisma/prisma.service';
 import { Artist } from './entities/artist.entity';
-import { ArtistService } from './artist.service';
 import { RecordNotFoundException } from '../frameworks/data-services/prisma/record-not-found-exception';
+import { PrismaService } from '../frameworks/data-services/prisma/prisma.service';
 
 @Injectable()
 export class ArtistRepository implements IRepository<Artist> {
@@ -11,7 +10,7 @@ export class ArtistRepository implements IRepository<Artist> {
 
   async create(entity: Artist): Promise<Artist> {
     const dto = entity.toDto();
-    const created = await this.prismaService.getClient().artist.create({
+    const created = await this.prismaService.artist.create({
       data: {
         name: dto.name,
         grammy: dto.grammy,
@@ -21,12 +20,12 @@ export class ArtistRepository implements IRepository<Artist> {
   }
 
   async findAll(): Promise<Artist[]> {
-    const list = await this.prismaService.getClient().artist.findMany();
+    const list = await this.prismaService.artist.findMany();
     return list.map((record) => Artist.toEntity(record));
   }
 
   async findAllLiked(): Promise<Artist[]> {
-    const list = await this.prismaService.getClient().artist.findMany({
+    const list = await this.prismaService.artist.findMany({
       where: {
         liked: true,
       },
@@ -35,7 +34,7 @@ export class ArtistRepository implements IRepository<Artist> {
   }
 
   async findOne(id: string): Promise<Artist> {
-    const found = await this.prismaService.getClient().artist.findUnique({
+    const found = await this.prismaService.artist.findUnique({
       where: {
         id: id,
       },
@@ -48,7 +47,7 @@ export class ArtistRepository implements IRepository<Artist> {
 
   async update(id: string, entity: Artist): Promise<Artist> {
     const dto = entity.toDto();
-    const updated = await this.prismaService.getClient().artist.update({
+    const updated = await this.prismaService.artist.update({
       where: {
         id: id,
       },
@@ -64,7 +63,7 @@ export class ArtistRepository implements IRepository<Artist> {
   }
 
   async delete(id: string): Promise<Artist> {
-    const deleted = await this.prismaService.getClient().artist.delete({
+    const deleted = await this.prismaService.artist.delete({
       where: {
         id: id,
       },

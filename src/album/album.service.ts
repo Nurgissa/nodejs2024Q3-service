@@ -2,87 +2,92 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
 import { TrackService } from '../track/track.service';
+import { AlbumRepository } from './album.repository';
 
 @Injectable()
 export class AlbumService {
-  #map = new Map<string, Album>();
+  constructor(
+    private readonly trackService: TrackService,
+    private readonly albumRepository: AlbumRepository,
+  ) {}
 
-  constructor(private readonly trackService: TrackService) {}
-
-  create(dto: CreateAlbumDto) {
-    const album = new Album(dto.name, dto.year, dto.artistId);
-    this.#map.set(album.getId(), album);
-    return album;
+  async create(dto: CreateAlbumDto) {
+    const album = new Album('dummy-id', dto.name, dto.year, dto.artistId);
+    const created = await this.albumRepository.create(album);
+    return created.toDto();
   }
 
-  findAll() {
-    return Array.from(this.#map.values());
+  async findAll() {
+    const list = await this.albumRepository.findAll();
+    return list.map((album) => album.toDto());
   }
 
-  findOne(id: string) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new NotFoundException('Album not found');
+  async findOne(id: string) {
+    try {
+      const album = await this.albumRepository.findOne(id);
+      return album.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-    return album;
   }
 
-  update(id: string, dto: UpdateAlbumDto) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new NotFoundException('Album not found');
+  async update(id: string, dto: UpdateAlbumDto) {
+    let album: Album;
+    try {
+      album = await this.albumRepository.findOne(id);
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
+
     try {
       album.update({ name: dto.name, year: dto.year, artistId: dto.artistId });
-    } catch (e) {
-      throw new BadRequestException(e.message);
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
 
-    return album;
+    return album.toDto();
   }
 
-  remove(id: string) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new NotFoundException('Album not found');
+  async remove(id: string) {
+    try {
+      const deleted = await this.albumRepository.delete(id);
+      this.trackService.unlinkTracksByAlbum(deleted.getId());
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-
-    this.trackService.unlinkTracksByAlbum(id);
-
-    return this.#map.delete(id);
   }
 
   unlinkAlbums(artistId: string) {
-    for (const album of this.#map.values()) {
-      if (artistId === album.getArtistId()) {
-        album.unlinkArtist();
-      }
-    }
+    // for (const album of this.#map.values()) {
+    //   if (artistId === album.getArtistId()) {
+    //     album.unlinkArtist();
+    //   }
+    // }
   }
 
   favorite(id: string) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new UnprocessableEntityException('Album not found');
-    }
-    album.like();
+    // const album = this.#map.get(id);
+    // if (!album) {
+    //   throw new UnprocessableEntityException('Album not found');
+    // }
+    // album.like();
   }
 
   unfavorite(id: string) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new UnprocessableEntityException('Album not found');
-    }
-    album.unlike();
+    // const album = this.#map.get(id);
+    // if (!album) {
+    //   throw new UnprocessableEntityException('Album not found');
+    // }
+    // album.unlike();
   }
 
   getFavoriteAlbums() {
-    return Array.from(this.#map.values()).filter((album) => album.isLiked());
+    return [];
+    // return Array.from(this.#map.values()).filter((album) => album.isLiked());
   }
 }

@@ -1,19 +1,24 @@
-import { getRandomId } from '../../utils';
 import { isUUID } from 'class-validator';
 
 export class Album {
-  readonly #id: string;
+  #id: string;
   #name: string;
   #year: number;
   #artistId: string | null;
   #liked: boolean;
 
-  constructor(name: string, year: number, artistid: string) {
-    this.#id = getRandomId();
+  constructor(
+    id: string,
+    name: string,
+    year: number,
+    artistId: string,
+    liked?: boolean,
+  ) {
+    this.#id = id;
     this.#name = name;
     this.#year = year;
-    this.#artistId = artistid;
-    this.#liked = false;
+    this.#artistId = artistId;
+    this.#liked = liked || false;
   }
 
   getId() {
@@ -70,6 +75,23 @@ export class Album {
       name: this.#name,
       year: this.#year,
       artistId: this.#artistId,
+      liked: this.#liked,
     };
+  }
+
+  static toEntity({
+    id,
+    name,
+    year,
+    artistId,
+    liked,
+  }: {
+    id: string;
+    name: string;
+    year: number;
+    artistId: string;
+    liked?: boolean;
+  }) {
+    return new Album(id, name, year, artistId, liked);
   }
 }
