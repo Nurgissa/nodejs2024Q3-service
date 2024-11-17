@@ -10,7 +10,6 @@ import { AlbumService } from '../album/album.service';
 import { TrackService } from '../track/track.service';
 import { getRandomId } from '../utils';
 import { ArtistRepository } from './artist.respository';
-import e from 'express';
 
 @Injectable()
 export class ArtistService {
@@ -23,7 +22,7 @@ export class ArtistService {
   ) {}
 
   async create(dto: CreateArtistDto) {
-    const artist = new Artist(getRandomId(), dto.name, dto.grammy);
+    const artist = new Artist(getRandomId(), dto.name, dto.grammy, false);
     const created = await this.artistRepository.create(artist);
     return created.toDto();
   }
@@ -34,22 +33,20 @@ export class ArtistService {
   }
 
   async findOne(id: string) {
-    try {
-      const artist = await this.artistRepository.findOne(id);
-      return artist.toDto();
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
+    const artist = await this.#findArtist(id);
+    return artist.toDto();
   }
 
-  async update(id: string, updateArtistDto: UpdateArtistDto) {
+  async update(id: string, dto: UpdateArtistDto) {
+    const artist = await this.#findArtist(id);
+
     try {
-      const artist = await this.artistRepository.findOne(id);
-
-      artist.update(updateArtistDto.name, updateArtistDto.grammy);
-
-      await this.artistRepository.update(id, artist);
-      return artist.toDto();
+      console.log(artist.toDto());
+      artist.update(dto.name, dto.grammy, dto.liked);
+      console.log(dto.liked);
+      console.log(artist.toDto());
+      const updated = await this.artistRepository.update(id, artist);
+      return updated.toDto();
     } catch (error) {
       throw new NotFoundException(error.message);
     }
@@ -60,9 +57,6 @@ export class ArtistService {
       const artist = await this.artistRepository.findOne(id);
       const artistId = artist.getId();
 
-      this.albumService.unlinkAlbums(artistId);
-      this.trackService.unlinkTracksByArtist(artistId);
-
       const deletedArtist = await this.artistRepository.delete(artistId);
       return deletedArtist.toDto();
     } catch (error) {
@@ -70,24 +64,36 @@ export class ArtistService {
     }
   }
 
-  favorite(id: string) {
-    // const artist = this.#map.get(id);
-    // if (!artist) {
-    //   throw new UnprocessableEntityException('Artist not found');
-    // }
-    // artist.like();
+  async favorite(id: string) {
+    try {
+      const artist = await this.#findArtist(id);
+      artist.like();
+      return this.update(id, { ...artist.toDto(), liked: artist.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
+    }
   }
 
-  unfavorite(id: string) {
-    // const artist = this.#map.get(id);
-    // if (!artist) {
-    //   throw new UnprocessableEntityException('Artist not found');
-    // }
-    // artist.unlike();
+  async unfavorite(id: string) {
+    try {
+      const artist = await this.#findArtist(id);
+      artist.unlike();
+      return this.update(id, { ...artist.toDto(), liked: artist.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
+    }
   }
 
-  getFavoriteArtist() {
-    return [];
-    //return Array.from(this.#map.values()).filter((album) => album.isLiked());
+  async getFavoriteArtist() {
+    const list = await this.artistRepository.findAllLiked();
+    return list.map((artist) => artist.toDto());
+  }
+
+  async #findArtist(id: string) {
+    try {
+      return this.artistRepository.findOne(id);
+    } catch (error) {
+      throw new NotFoundException(`artist with id:${id} not found`);
+    }
   }
 }

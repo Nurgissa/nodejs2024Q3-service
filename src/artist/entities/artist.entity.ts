@@ -20,12 +20,16 @@ export class Artist {
     return this.#id;
   }
 
-  update(name?: string, hasWonGrammy?: boolean) {
+  update(name?: string, hasWonGrammy?: boolean, liked?: boolean) {
     if (name) {
       this.#name = name;
     }
     if (hasWonGrammy !== undefined) {
       this.#hasWonGrammy = hasWonGrammy;
+    }
+
+    if (liked !== undefined) {
+      this.#liked = liked;
     }
 
     return this;

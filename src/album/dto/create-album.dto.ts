@@ -8,4 +8,6 @@ export class CreateAlbumDto {
   year: number;
 
   artistId: string | null;
+
+  liked?: boolean;
 }

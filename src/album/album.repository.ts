@@ -17,7 +17,7 @@ export class AlbumRepository implements IRepository<Album> {
         name: dto.name,
         year: dto.year,
         artistId: dto.artistId,
-        liked: dto.liked,
+        liked: entity.isLiked(),
       },
     });
     return Album.toEntity(created);
@@ -38,21 +38,17 @@ export class AlbumRepository implements IRepository<Album> {
   }
 
   async findOne(id: string): Promise<Album> {
-    const found = await this.prismaService.album.findUnique({
+    const found = await this.prismaService.album.findUniqueOrThrow({
       where: {
         id: id,
       },
     });
-
-    if (!found) {
-      throw new RecordNotFoundException(`album with id:${id} cannot be found`);
-    }
-
     return Album.toEntity(found);
   }
 
   async update(id: string, entity: Album): Promise<Album> {
     const dto = entity.toDto();
+    console.log('inside repo', dto);
     const updated = await this.prismaService.album.update({
       where: {
         id: id,
@@ -61,7 +57,7 @@ export class AlbumRepository implements IRepository<Album> {
         name: dto.name,
         year: dto.year,
         artistId: dto.artistId,
-        liked: dto.liked,
+        liked: entity.isLiked(),
       },
     });
 

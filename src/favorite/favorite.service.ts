@@ -11,41 +11,35 @@ export class FavoriteService {
     private readonly artistService: ArtistService,
   ) {}
 
-  findAll() {
+  async findAll() {
     return {
-      artists: this.artistService
-        .getFavoriteArtist()
-        .map((artist) => artist.toDto()),
-      albums: this.albumService
-        .getFavoriteAlbums()
-        .map((album) => album.toDto()),
-      tracks: this.trackService
-        .getFavoriteTracks()
-        .map((track) => track.toDto()),
+      artists: await this.artistService.getFavoriteArtist(),
+      albums: await this.albumService.getFavoriteAlbums(),
+      tracks: await this.trackService.getFavoriteTracks(),
     };
   }
 
   favoriteTrack(id: string) {
-    this.trackService.favorite(id);
+    return this.trackService.favorite(id);
   }
 
   unfavoriteTrack(id: string) {
-    this.trackService.unfavorite(id);
+    return this.trackService.unfavorite(id);
   }
 
   favoriteAlbum(id: string) {
-    this.albumService.favorite(id);
+    return this.albumService.favorite(id);
   }
 
   unfavoriteAlbum(id: string) {
-    this.albumService.unfavorite(id);
+    return this.albumService.unfavorite(id);
   }
 
   favoriteArtist(id: string) {
-    this.artistService.favorite(id);
+    return this.artistService.favorite(id);
   }
 
   unfavoriteArtist(id: string) {
-    this.artistService.unfavorite(id);
+    return this.artistService.unfavorite(id);
   }
 }

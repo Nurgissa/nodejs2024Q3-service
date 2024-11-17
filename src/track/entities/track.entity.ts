@@ -1,4 +1,3 @@
-import { getRandomId } from '../../utils';
 import { isUUID } from 'class-validator';
 
 export class Track {
@@ -10,17 +9,19 @@ export class Track {
   #liked: boolean;
 
   constructor(
+    id: string,
     name: string,
     duration: number,
     artistId: string | null,
     albumId: string | null,
+    liked?: boolean,
   ) {
-    this.#id = getRandomId();
+    this.#id = id;
     this.#name = name;
     this.#artistId = artistId;
     this.#albumId = albumId;
     this.#duration = duration;
-    this.#liked = false;
+    this.#liked = liked || false;
   }
 
   getId() {
@@ -40,11 +41,13 @@ export class Track {
     duration,
     artistId,
     albumId,
+    liked,
   }: {
     name?: string;
     duration?: number;
     artistId?: string;
     albumId?: string;
+    liked?: boolean;
   }) {
     if (name) {
       this.#name = name;
@@ -63,6 +66,10 @@ export class Track {
         throw new Error('albumId must be a UUID');
       }
       this.#albumId = albumId;
+    }
+
+    if (liked !== undefined) {
+      this.#liked = liked;
     }
   }
 
@@ -94,5 +101,23 @@ export class Track {
       artistId: this.#artistId,
       albumId: this.#albumId,
     };
+  }
+
+  static toEntity({
+    id,
+    name,
+    duration,
+    artistId,
+    albumId,
+    liked,
+  }: {
+    id: string;
+    name: string;
+    duration: number;
+    artistId: string | null;
+    albumId: string | null;
+    liked?: boolean;
+  }) {
+    return new Track(id, name, duration, artistId, albumId, liked);
   }
 }

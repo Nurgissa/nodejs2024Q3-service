@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IRepository } from '../core/data-access/repository.inteface';
 import { Artist } from './entities/artist.entity';
 import { RecordNotFoundException } from '../frameworks/data-services/prisma/record-not-found-exception';
@@ -14,6 +14,7 @@ export class ArtistRepository implements IRepository<Artist> {
       data: {
         name: dto.name,
         grammy: dto.grammy,
+        liked: entity.isLiked(),
       },
     });
     return Artist.toEntity(created);
@@ -34,14 +35,11 @@ export class ArtistRepository implements IRepository<Artist> {
   }
 
   async findOne(id: string): Promise<Artist> {
-    const found = await this.prismaService.artist.findUnique({
+    const found = await this.prismaService.artist.findUniqueOrThrow({
       where: {
         id: id,
       },
     });
-    if (!found) {
-      throw new RecordNotFoundException(`artist with id:${id} cannot be found`);
-    }
     return Artist.toEntity(found);
   }
 
@@ -54,6 +52,7 @@ export class ArtistRepository implements IRepository<Artist> {
       data: {
         name: dto.name,
         grammy: dto.grammy,
+        liked: entity.isLiked(),
       },
     });
     if (!updated) {

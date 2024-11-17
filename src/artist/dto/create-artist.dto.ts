@@ -7,4 +7,6 @@ export class CreateArtistDto {
 
   @IsNotEmpty()
   grammy: boolean;
+
+  liked?: boolean;
 }

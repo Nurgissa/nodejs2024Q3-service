@@ -7,34 +7,37 @@ import {
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
+import { TrackRepository } from './track.repository';
 
 @Injectable()
 export class TrackService {
-  #map = new Map<string, Track>();
+  constructor(private readonly trackRepository: TrackRepository) {}
 
-  create(dto: CreateTrackDto) {
-    const track = new Track(dto.name, dto.duration, dto.artistId, dto.albumId);
-    this.#map.set(track.getId(), track);
-    return track;
+  async create(dto: CreateTrackDto) {
+    const track = new Track(
+      'dummy-id',
+      dto.name,
+      dto.duration,
+      dto.artistId,
+      dto.albumId,
+      false,
+    );
+    const created = await this.trackRepository.create(track);
+    return created.toDto();
   }
 
-  findAll() {
-    return Array.from(this.#map.values());
+  async findAll() {
+    const list = await this.trackRepository.findAll();
+    return list.map((track) => track.toDto());
   }
 
-  findOne(id: string) {
-    const track = this.#map.get(id);
-    if (!track) {
-      throw new NotFoundException('Track not found');
-    }
-    return track;
+  async findOne(id: string) {
+    const found = await this.#findTrack(id);
+    return found.toDto();
   }
 
-  update(id: string, dto: UpdateTrackDto) {
-    const track = this.#map.get(id);
-    if (!track) {
-      throw new NotFoundException('Track not found');
-    }
+  async update(id: string, dto: UpdateTrackDto) {
+    const track = await this.#findTrack(id);
 
     try {
       track.update({
@@ -42,56 +45,55 @@ export class TrackService {
         duration: dto.duration,
         artistId: dto.artistId,
         albumId: dto.albumId,
+        liked: dto.liked,
       });
+      await this.trackRepository.update(id, track);
     } catch (e) {
       throw new BadRequestException(e.message);
     }
 
-    return track;
+    return track.toDto();
   }
 
-  remove(id: string) {
-    const track = this.#map.get(id);
-    if (!track) {
-      throw new NotFoundException('Track not found');
-    }
-
-    return this.#map.delete(id);
-  }
-
-  unlinkTracksByArtist(id: string) {
-    for (const track of this.#map.values()) {
-      if (track.getArtistId() === id) {
-        track.unlinkArtist();
-      }
+  async remove(id: string) {
+    try {
+      const deleted = await this.trackRepository.delete(id);
+      return deleted.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
   }
 
-  unlinkTracksByAlbum(id: string) {
-    for (const track of this.#map.values()) {
-      if (track.getAlbumId() === id) {
-        track.unlinkAlbum();
-      }
+  async favorite(id: string) {
+    try {
+      const track = await this.#findTrack(id);
+      track.like();
+      return this.update(id, { ...track.toDto(), liked: track.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
     }
   }
 
-  favorite(id: string) {
-    const track = this.#map.get(id);
-    if (!track) {
-      throw new UnprocessableEntityException('Track not found');
+  async unfavorite(id: string) {
+    try {
+      const track = await this.#findTrack(id);
+      track.unlike();
+      return this.update(id, { ...track.toDto(), liked: track.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
     }
-    track.like();
   }
 
-  unfavorite(id: string) {
-    const track = this.#map.get(id);
-    if (!track) {
-      throw new UnprocessableEntityException('Track not found');
-    }
-    track.unlike();
+  async getFavoriteTracks() {
+    const list = await this.trackRepository.findAllLiked();
+    return list.map((track) => track.toDto());
   }
 
-  getFavoriteTracks() {
-    return Array.from(this.#map.values()).filter((track) => track.isLiked());
+  async #findTrack(id: string) {
+    try {
+      return this.trackRepository.findOne(id);
+    } catch (error) {
+      throw new NotFoundException(`track with id: ${id} not found`);
+    }
   }
 }

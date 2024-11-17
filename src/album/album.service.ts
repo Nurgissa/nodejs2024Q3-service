@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
@@ -17,7 +18,13 @@ export class AlbumService {
   ) {}
 
   async create(dto: CreateAlbumDto) {
-    const album = new Album('dummy-id', dto.name, dto.year, dto.artistId);
+    const album = new Album(
+      'dummy-id',
+      dto.name,
+      dto.year,
+      dto.artistId,
+      false,
+    );
     const created = await this.albumRepository.create(album);
     return created.toDto();
   }
@@ -28,66 +35,65 @@ export class AlbumService {
   }
 
   async findOne(id: string) {
-    try {
-      const album = await this.albumRepository.findOne(id);
-      return album.toDto();
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
+    const found = await this.#findAlbum(id);
+    return found.toDto();
   }
 
   async update(id: string, dto: UpdateAlbumDto) {
-    let album: Album;
+    const album = await this.#findAlbum(id);
     try {
-      album = await this.albumRepository.findOne(id);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-
-    try {
-      album.update({ name: dto.name, year: dto.year, artistId: dto.artistId });
+      album.update({
+        name: dto.name,
+        year: dto.year,
+        artistId: dto.artistId,
+        liked: dto.liked,
+      });
+      const updated = await this.albumRepository.update(id, album);
+      return updated.toDto();
     } catch (error) {
       throw new BadRequestException(error.message);
     }
-
-    return album.toDto();
   }
 
   async remove(id: string) {
     try {
       const deleted = await this.albumRepository.delete(id);
-      this.trackService.unlinkTracksByAlbum(deleted.getId());
+      return deleted.toDto();
     } catch (error) {
       throw new NotFoundException(error.message);
     }
   }
 
-  unlinkAlbums(artistId: string) {
-    // for (const album of this.#map.values()) {
-    //   if (artistId === album.getArtistId()) {
-    //     album.unlinkArtist();
-    //   }
-    // }
+  async favorite(id: string) {
+    try {
+      const found = await this.albumRepository.findOne(id);
+      found.like();
+      return this.update(id, { ...found.toDto(), liked: found.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
+    }
   }
 
-  favorite(id: string) {
-    // const album = this.#map.get(id);
-    // if (!album) {
-    //   throw new UnprocessableEntityException('Album not found');
-    // }
-    // album.like();
+  async unfavorite(id: string) {
+    try {
+      const found = await this.albumRepository.findOne(id);
+      found.unlike();
+      return this.update(id, { ...found.toDto(), liked: found.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
+    }
   }
 
-  unfavorite(id: string) {
-    // const album = this.#map.get(id);
-    // if (!album) {
-    //   throw new UnprocessableEntityException('Album not found');
-    // }
-    // album.unlike();
+  async getFavoriteAlbums() {
+    const list = await this.albumRepository.findAllLiked();
+    return list.map((album) => album.toDto());
   }
 
-  getFavoriteAlbums() {
-    return [];
-    // return Array.from(this.#map.values()).filter((album) => album.isLiked());
+  async #findAlbum(id: string) {
+    try {
+      return this.albumRepository.findOne(id);
+    } catch (error) {
+      throw new NotFoundException(`album with id:${id} not found`);
+    }
   }
 }

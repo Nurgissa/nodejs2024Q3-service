@@ -11,7 +11,7 @@ export class Album {
     id: string,
     name: string,
     year: number,
-    artistId: string,
+    artistId: string | null,
     liked?: boolean,
   ) {
     this.#id = id;
@@ -33,16 +33,23 @@ export class Album {
     name,
     year,
     artistId,
+    liked,
   }: {
     name?: string;
     year?: number;
     artistId?: string;
+    liked?: boolean;
   }) {
     if (name) {
       this.#name = name;
     }
     if (year) {
       this.#year = year;
+    }
+
+    console.log('liked', this.#liked, liked);
+    if (liked !== undefined) {
+      this.#liked = liked;
     }
 
     if (artistId) {
@@ -75,7 +82,6 @@ export class Album {
       name: this.#name,
       year: this.#year,
       artistId: this.#artistId,
-      liked: this.#liked,
     };
   }
 
@@ -89,9 +95,13 @@ export class Album {
     id: string;
     name: string;
     year: number;
-    artistId: string;
+    artistId: string | null;
     liked?: boolean;
   }) {
     return new Album(id, name, year, artistId, liked);
+  }
+
+  toString() {
+    return this.#name;
   }
 }
