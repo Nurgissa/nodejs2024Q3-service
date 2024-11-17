@@ -8,6 +8,9 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
 import { AlbumService } from '../album/album.service';
 import { TrackService } from '../track/track.service';
+import { getRandomId } from '../utils';
+import { ArtistRepository } from './artist.respository';
+import e from 'express';
 
 @Injectable()
 export class ArtistService {
@@ -16,48 +19,55 @@ export class ArtistService {
   constructor(
     private readonly albumService: AlbumService,
     private readonly trackService: TrackService,
+    private readonly artistRepository: ArtistRepository,
   ) {}
 
-  create(dto: CreateArtistDto) {
-    const artist = new Artist(dto.name, dto.grammy);
-    this.#map.set(artist.getId(), artist);
-    return artist;
+  async create(dto: CreateArtistDto) {
+    const artist = new Artist(getRandomId(), dto.name, dto.grammy);
+    const created = await this.artistRepository.create(artist);
+    return created.toDto();
   }
 
-  findAll() {
-    return Array.from(this.#map.values());
+  async findAll() {
+    const artists = await this.artistRepository.findAll();
+    return artists.map((artist) => artist);
   }
 
-  findOne(id: string) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
+  async findOne(id: string) {
+    try {
+      const artist = await this.artistRepository.findOne(id);
+      return artist.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-    return artist;
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
+  async update(id: string, updateArtistDto: UpdateArtistDto) {
+    try {
+      const artist = await this.artistRepository.findOne(id);
+
+      artist.update(updateArtistDto.name, updateArtistDto.grammy);
+
+      await this.artistRepository.update(id, artist);
+      return artist.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-    artist.update(updateArtistDto.name, updateArtistDto.grammy);
-    return artist;
   }
 
-  remove(id: string) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
+  async remove(id: string) {
+    try {
+      const artist = await this.artistRepository.findOne(id);
+      const artistId = artist.getId();
+
+      this.albumService.unlinkAlbums(artistId);
+      this.trackService.unlinkTracksByArtist(artistId);
+
+      const deletedArtist = await this.artistRepository.delete(artistId);
+      return deletedArtist.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-
-    const artistId = artist.getId();
-
-    this.albumService.unlinkAlbums(artistId);
-
-    this.trackService.unlinkTracksByArtist(artistId);
-
-    return this.#map.delete(id);
   }
 
   favorite(id: string) {

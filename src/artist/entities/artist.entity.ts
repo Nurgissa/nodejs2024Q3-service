@@ -1,16 +1,19 @@
-import { getRandomId } from '../../utils';
-
 export class Artist {
-  readonly #id: string;
+  #id: string;
   #name: string;
   #hasWonGrammy: boolean;
   #liked: boolean;
 
-  constructor(name: string, hasWonGrammy: boolean) {
-    this.#id = getRandomId();
+  constructor(
+    id: string,
+    name: string,
+    hasWonGrammy: boolean,
+    liked?: boolean,
+  ) {
+    this.#id = id;
     this.#name = name;
     this.#hasWonGrammy = hasWonGrammy;
-    this.#liked = false;
+    this.#liked = liked || false;
   }
 
   getId(): string {
@@ -40,11 +43,25 @@ export class Artist {
     return this.#liked;
   }
 
-  toDto(): ArtistDto {
+  toDto() {
     return {
       id: this.#id,
       name: this.#name,
       grammy: this.#hasWonGrammy,
     };
+  }
+
+  static toEntity({
+    id,
+    name,
+    grammy,
+    liked,
+  }: {
+    id: string;
+    name: string;
+    grammy: boolean;
+    liked?: boolean;
+  }) {
+    return new Artist(id, name, grammy, liked);
   }
 }

@@ -22,17 +22,17 @@ export class ArtistController {
   @Post()
   @HttpCode(201)
   create(@Body() createArtistDto: CreateArtistDto) {
-    return this.artistService.create(createArtistDto).toDto();
+    return this.artistService.create(createArtistDto);
   }
 
   @Get()
   findAll() {
-    return this.artistService.findAll().map((user) => user.toDto());
+    return this.artistService.findAll();
   }
 
   @Get(':id')
   findOne(@Param() params: FindOneParams) {
-    return this.artistService.findOne(params.id).toDto();
+    return this.artistService.findOne(params.id);
   }
 
   @Put(':id')
@@ -40,7 +40,7 @@ export class ArtistController {
     @Param() params: FindOneParams,
     @Body() updateArtistDto: UpdateArtistDto,
   ) {
-    return this.artistService.update(params.id, updateArtistDto).toDto();
+    return this.artistService.update(params.id, updateArtistDto);
   }
 
   @Delete(':id')

@@ -64,7 +64,7 @@ export class Album {
     return this.#liked;
   }
 
-  toDto(): AlbumDto {
+  toDto() {
     return {
       id: this.#id,
       name: this.#name,
