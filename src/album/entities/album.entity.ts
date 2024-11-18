@@ -21,14 +21,6 @@ export class Album {
     this.#liked = liked || false;
   }
 
-  getId() {
-    return this.#id;
-  }
-
-  getArtistId() {
-    return this.#artistId;
-  }
-
   update({
     name,
     year,
@@ -58,10 +50,6 @@ export class Album {
       }
       this.#artistId = artistId;
     }
-  }
-
-  unlinkArtist() {
-    this.#artistId = null;
   }
 
   like() {

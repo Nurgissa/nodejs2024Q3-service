@@ -91,7 +91,7 @@ export class TrackService {
 
   async #findTrack(id: string) {
     try {
-      return this.trackRepository.findOne(id);
+      return await this.trackRepository.findOne(id);
     } catch (error) {
       throw new NotFoundException(`track with id: ${id} not found`);
     }

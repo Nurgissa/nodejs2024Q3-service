@@ -9,10 +9,7 @@ import {
 
 @Controller()
 export class FavoriteAlbumController {
-  constructor(
-    // @Inject(forwardRef(() => FavoriteService))
-    private readonly favoriteService: FavoriteService,
-  ) {}
+  constructor(private readonly favoriteService: FavoriteService) {}
 
   @ApiCreatedResponse({ description: 'Favorited successfully' })
   @ApiUnprocessableEntityResponse({ description: 'Cannot be favorited' })

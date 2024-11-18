@@ -48,7 +48,6 @@ export class AlbumRepository implements IRepository<Album> {
 
   async update(id: string, entity: Album): Promise<Album> {
     const dto = entity.toDto();
-    console.log('inside repo', dto);
     const updated = await this.prismaService.album.update({
       where: {
         id: id,

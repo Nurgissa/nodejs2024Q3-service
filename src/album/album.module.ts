@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { AlbumController } from './album.controller';
-import { TrackModule } from '../track/track.module';
 import { AlbumRepository } from './album.repository';
 import { PrismaModule } from '../frameworks/data-services/prisma/prisma.module';
 
@@ -9,6 +8,6 @@ import { PrismaModule } from '../frameworks/data-services/prisma/prisma.module';
   controllers: [AlbumController],
   providers: [AlbumRepository, AlbumService],
   exports: [AlbumService],
-  imports: [TrackModule, PrismaModule],
+  imports: [PrismaModule],
 })
 export class AlbumModule {}

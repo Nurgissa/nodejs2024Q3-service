@@ -6,20 +6,12 @@ import {
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
-import { AlbumService } from '../album/album.service';
-import { TrackService } from '../track/track.service';
 import { getRandomId } from '../utils';
 import { ArtistRepository } from './artist.respository';
 
 @Injectable()
 export class ArtistService {
-  // #map = new Map<string, Artist>();
-
-  constructor(
-    private readonly albumService: AlbumService,
-    private readonly trackService: TrackService,
-    private readonly artistRepository: ArtistRepository,
-  ) {}
+  constructor(private readonly artistRepository: ArtistRepository) {}
 
   async create(dto: CreateArtistDto) {
     const artist = new Artist(getRandomId(), dto.name, dto.grammy, false);
@@ -91,7 +83,7 @@ export class ArtistService {
 
   async #findArtist(id: string) {
     try {
-      return this.artistRepository.findOne(id);
+      return await this.artistRepository.findOne(id);
     } catch (error) {
       throw new NotFoundException(`artist with id:${id} not found`);
     }

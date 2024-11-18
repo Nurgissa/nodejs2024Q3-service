@@ -24,18 +24,6 @@ export class Track {
     this.#liked = liked || false;
   }
 
-  getId() {
-    return this.#id;
-  }
-
-  getArtistId() {
-    return this.#artistId;
-  }
-
-  getAlbumId() {
-    return this.#albumId;
-  }
-
   update({
     name,
     duration,
@@ -71,14 +59,6 @@ export class Track {
     if (liked !== undefined) {
       this.#liked = liked;
     }
-  }
-
-  unlinkArtist() {
-    this.#artistId = null;
-  }
-
-  unlinkAlbum() {
-    this.#albumId = null;
   }
 
   like() {
