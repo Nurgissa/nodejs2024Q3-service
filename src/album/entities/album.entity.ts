@@ -39,7 +39,6 @@ export class Album {
       this.#year = year;
     }
 
-    console.log('liked', this.#liked, liked);
     if (liked !== undefined) {
       this.#liked = liked;
     }

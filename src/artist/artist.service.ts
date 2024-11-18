@@ -33,10 +33,7 @@ export class ArtistService {
     const artist = await this.#findArtist(id);
 
     try {
-      console.log(artist.toDto());
       artist.update(dto.name, dto.grammy, dto.liked);
-      console.log(dto.liked);
-      console.log(artist.toDto());
       const updated = await this.artistRepository.update(id, artist);
       return updated.toDto();
     } catch (error) {
