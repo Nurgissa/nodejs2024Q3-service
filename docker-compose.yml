@@ -7,8 +7,6 @@ services:
     restart: always
     volumes:
       - database_data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
     env_file:
       - .env
     networks:
@@ -25,14 +23,12 @@ services:
       - database
     networks:
       custom-network:
-#    volumes:
-#      - ./src:/app/src
 
   adminer:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - '8080:8080'
     networks:
       custom-network:
 
