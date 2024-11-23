@@ -4,8 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
-  HttpStatus,
   Param,
   Post,
   Put,
@@ -15,19 +13,23 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { FindOneParams } from './dto/fine-one-params.dto';
-import { UserDto } from './dto/user.dto';
-// import { User } from "./entities/user.entity";
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Post()
+  @HttpCode(201)
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
+  }
+
   @Get()
   @ApiOperation({ summary: 'List all users' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  findAll(): UserDto[] {
-    return this.userService.findAll().map((user) => user.toDto());
+  findAll() {
+    return this.userService.findAll();
   }
 
   @Get(':id')
@@ -36,28 +38,16 @@ export class UserController {
     description: 'Get user by id',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  findOne(@Param() params: FindOneParams): UserDto {
-    const user = this.userService.findOneId(params.id);
-    if (!user) {
-      throw new HttpException('NotFoundError', HttpStatus.NOT_FOUND);
-    }
-
-    return user.toDto();
-  }
-
-  @Post()
-  @HttpCode(201)
-  create(@Body() createUserDto: CreateUserDto): UserDto {
-    const user = this.userService.create(createUserDto);
-    return user.toDto();
+  findOne(@Param() params: FindOneParams) {
+    return this.userService.findOne(params.id);
   }
 
   @Put(':id')
   update(
     @Param() params: FindOneParams,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ): UserDto {
-    return this.userService.update(params.id, updatePasswordDto).toDto();
+  ) {
+    return this.userService.update(params.id, updatePasswordDto);
   }
 
   @Delete(':id')

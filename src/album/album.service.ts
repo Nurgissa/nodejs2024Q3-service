@@ -7,82 +7,89 @@ import {
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
-import { TrackService } from '../track/track.service';
+import { AlbumRepository } from './album.repository';
 
 @Injectable()
 export class AlbumService {
-  #map = new Map<string, Album>();
+  constructor(private readonly albumRepository: AlbumRepository) {}
 
-  constructor(private readonly trackService: TrackService) {}
-
-  create(dto: CreateAlbumDto) {
-    const album = new Album(dto.name, dto.year, dto.artistId);
-    this.#map.set(album.getId(), album);
-    return album;
+  async create(dto: CreateAlbumDto) {
+    const album = new Album(
+      'dummy-id',
+      dto.name,
+      dto.year,
+      dto.artistId,
+      false,
+    );
+    const created = await this.albumRepository.create(album);
+    return created.toDto();
   }
 
-  findAll() {
-    return Array.from(this.#map.values());
+  async findAll() {
+    const list = await this.albumRepository.findAll();
+    return list.map((album) => album.toDto());
   }
 
-  findOne(id: string) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new NotFoundException('Album not found');
-    }
-    return album;
+  async findOne(id: string) {
+    const found = await this.#findAlbum(id);
+    return found.toDto();
   }
 
-  update(id: string, dto: UpdateAlbumDto) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new NotFoundException('Album not found');
-    }
+  async update(id: string, dto: UpdateAlbumDto) {
+    const album = await this.#findAlbum(id);
     try {
-      album.update({ name: dto.name, year: dto.year, artistId: dto.artistId });
-    } catch (e) {
-      throw new BadRequestException(e.message);
-    }
-
-    return album;
-  }
-
-  remove(id: string) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new NotFoundException('Album not found');
-    }
-
-    this.trackService.unlinkTracksByAlbum(id);
-
-    return this.#map.delete(id);
-  }
-
-  unlinkAlbums(artistId: string) {
-    for (const album of this.#map.values()) {
-      if (artistId === album.getArtistId()) {
-        album.unlinkArtist();
-      }
+      album.update({
+        name: dto.name,
+        year: dto.year,
+        artistId: dto.artistId,
+        liked: dto.liked,
+      });
+      const updated = await this.albumRepository.update(id, album);
+      return updated.toDto();
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 
-  favorite(id: string) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new UnprocessableEntityException('Album not found');
+  async remove(id: string) {
+    try {
+      const deleted = await this.albumRepository.delete(id);
+      return deleted.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-    album.like();
   }
 
-  unfavorite(id: string) {
-    const album = this.#map.get(id);
-    if (!album) {
-      throw new UnprocessableEntityException('Album not found');
+  async favorite(id: string) {
+    try {
+      const found = await this.albumRepository.findOne(id);
+      found.like();
+      return this.update(id, { ...found.toDto(), liked: found.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
     }
-    album.unlike();
   }
 
-  getFavoriteAlbums() {
-    return Array.from(this.#map.values()).filter((album) => album.isLiked());
+  async unfavorite(id: string) {
+    try {
+      const found = await this.albumRepository.findOne(id);
+      found.unlike();
+      return this.update(id, { ...found.toDto(), liked: found.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
+    }
+  }
+
+  async getFavoriteAlbums() {
+    const list = await this.albumRepository.findAllLiked();
+    return list.map((album) => album.toDto());
+  }
+
+  async #findAlbum(id: string) {
+    try {
+      return await this.albumRepository.findOne(id);
+    } catch (error) {
+      throw new NotFoundException(`album with id:${id} not found`);
+    }
   }
 }

@@ -23,17 +23,17 @@ export class AlbumController {
   @Post()
   @HttpCode(201)
   create(@Body() createAlbumDto: CreateAlbumDto) {
-    return this.albumService.create(createAlbumDto).toDto();
+    return this.albumService.create(createAlbumDto);
   }
 
   @Get()
   findAll() {
-    return this.albumService.findAll().map((album) => album.toDto());
+    return this.albumService.findAll();
   }
 
   @Get(':id')
   findOne(@Param() params: FindOneParams) {
-    return this.albumService.findOne(params.id).toDto();
+    return this.albumService.findOne(params.id);
   }
 
   @Put(':id')
@@ -41,7 +41,7 @@ export class AlbumController {
     @Param() params: FindOneParams,
     @Body() updateAlbumDto: UpdateAlbumDto,
   ) {
-    return this.albumService.update(params.id, updateAlbumDto).toDto();
+    return this.albumService.update(params.id, updateAlbumDto);
   }
 
   @Delete(':id')

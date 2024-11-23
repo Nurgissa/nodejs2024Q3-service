@@ -4,10 +4,7 @@ import { FavoriteService } from '../favorite.service';
 
 @Controller()
 export class FavoriteTrackController {
-  constructor(
-    // @Inject(forwardRef(() => FavoriteService))
-    private readonly favoriteService: FavoriteService,
-  ) {}
+  constructor(private readonly favoriteService: FavoriteService) {}
 
   @Post(':id')
   favoriteTrack(@Param() params: FindOneParams) {

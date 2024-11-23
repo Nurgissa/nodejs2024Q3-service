@@ -1,37 +1,36 @@
-import { getRandomId } from '../../utils';
 import { isUUID } from 'class-validator';
 
 export class Album {
-  readonly #id: string;
+  #id: string;
   #name: string;
   #year: number;
   #artistId: string | null;
   #liked: boolean;
 
-  constructor(name: string, year: number, artistid: string) {
-    this.#id = getRandomId();
+  constructor(
+    id: string,
+    name: string,
+    year: number,
+    artistId: string | null,
+    liked?: boolean,
+  ) {
+    this.#id = id;
     this.#name = name;
     this.#year = year;
-    this.#artistId = artistid;
-    this.#liked = false;
-  }
-
-  getId() {
-    return this.#id;
-  }
-
-  getArtistId() {
-    return this.#artistId;
+    this.#artistId = artistId;
+    this.#liked = liked || false;
   }
 
   update({
     name,
     year,
     artistId,
+    liked,
   }: {
     name?: string;
     year?: number;
     artistId?: string;
+    liked?: boolean;
   }) {
     if (name) {
       this.#name = name;
@@ -40,16 +39,16 @@ export class Album {
       this.#year = year;
     }
 
+    if (liked !== undefined) {
+      this.#liked = liked;
+    }
+
     if (artistId) {
       if (!isUUID(artistId)) {
         throw new Error('Not valid artistId');
       }
       this.#artistId = artistId;
     }
-  }
-
-  unlinkArtist() {
-    this.#artistId = null;
   }
 
   like() {
@@ -64,12 +63,32 @@ export class Album {
     return this.#liked;
   }
 
-  toDto(): AlbumDto {
+  toDto() {
     return {
       id: this.#id,
       name: this.#name,
       year: this.#year,
       artistId: this.#artistId,
     };
+  }
+
+  static toEntity({
+    id,
+    name,
+    year,
+    artistId,
+    liked,
+  }: {
+    id: string;
+    name: string;
+    year: number;
+    artistId: string | null;
+    liked?: boolean;
+  }) {
+    return new Album(id, name, year, artistId, liked);
+  }
+
+  toString() {
+    return this.#name;
   }
 }

@@ -6,77 +6,83 @@ import {
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
-import { AlbumService } from '../album/album.service';
-import { TrackService } from '../track/track.service';
+import { getRandomId } from '../utils';
+import { ArtistRepository } from './artist.respository';
 
 @Injectable()
 export class ArtistService {
-  #map = new Map<string, Artist>();
+  constructor(private readonly artistRepository: ArtistRepository) {}
 
-  constructor(
-    private readonly albumService: AlbumService,
-    private readonly trackService: TrackService,
-  ) {}
-
-  create(dto: CreateArtistDto) {
-    const artist = new Artist(dto.name, dto.grammy);
-    this.#map.set(artist.getId(), artist);
-    return artist;
+  async create(dto: CreateArtistDto) {
+    const artist = new Artist(getRandomId(), dto.name, dto.grammy, false);
+    const created = await this.artistRepository.create(artist);
+    return created.toDto();
   }
 
-  findAll() {
-    return Array.from(this.#map.values());
+  async findAll() {
+    const artists = await this.artistRepository.findAll();
+    return artists.map((artist) => artist.toDto());
   }
 
-  findOne(id: string) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
+  async findOne(id: string) {
+    const artist = await this.#findArtist(id);
+    return artist.toDto();
+  }
+
+  async update(id: string, dto: UpdateArtistDto) {
+    const artist = await this.#findArtist(id);
+
+    try {
+      artist.update(dto.name, dto.grammy, dto.liked);
+      const updated = await this.artistRepository.update(id, artist);
+      return updated.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-    return artist;
   }
 
-  update(id: string, updateArtistDto: UpdateArtistDto) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
+  async remove(id: string) {
+    try {
+      const artist = await this.artistRepository.findOne(id);
+      const artistId = artist.getId();
+
+      const deletedArtist = await this.artistRepository.delete(artistId);
+      return deletedArtist.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
     }
-    artist.update(updateArtistDto.name, updateArtistDto.grammy);
-    return artist;
   }
 
-  remove(id: string) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
+  async favorite(id: string) {
+    try {
+      const artist = await this.#findArtist(id);
+      artist.like();
+      return this.update(id, { ...artist.toDto(), liked: artist.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
     }
-
-    const artistId = artist.getId();
-
-    this.albumService.unlinkAlbums(artistId);
-
-    this.trackService.unlinkTracksByArtist(artistId);
-
-    return this.#map.delete(id);
   }
 
-  favorite(id: string) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new UnprocessableEntityException('Artist not found');
+  async unfavorite(id: string) {
+    try {
+      const artist = await this.#findArtist(id);
+      artist.unlike();
+      return this.update(id, { ...artist.toDto(), liked: artist.isLiked() });
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
     }
-    artist.like();
   }
 
-  unfavorite(id: string) {
-    const artist = this.#map.get(id);
-    if (!artist) {
-      throw new UnprocessableEntityException('Artist not found');
+  async getFavoriteArtist() {
+    const list = await this.artistRepository.findAllLiked();
+    return list.map((artist) => artist.toDto());
+  }
+
+  async #findArtist(id: string) {
+    try {
+      return await this.artistRepository.findOne(id);
+    } catch (error) {
+      throw new NotFoundException(`artist with id:${id} not found`);
     }
-    artist.unlike();
-  }
-
-  getFavoriteArtist() {
-    return Array.from(this.#map.values()).filter((album) => album.isLiked());
   }
 }

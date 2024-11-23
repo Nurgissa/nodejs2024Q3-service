@@ -15,8 +15,8 @@ import { JsonContentTypeMiddleware } from './json-content-type.middleware';
 @Module({
   imports: [
     UserModule,
-    ArtistModule,
     AlbumModule,
+    ArtistModule,
     TrackModule,
     FavoriteModule,
     FavoriteTrackModule,

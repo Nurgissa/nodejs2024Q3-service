@@ -22,17 +22,17 @@ export class TrackController {
   @Post()
   @HttpCode(201)
   create(@Body() createTrackDto: CreateTrackDto) {
-    return this.trackService.create(createTrackDto).toDto();
+    return this.trackService.create(createTrackDto);
   }
 
   @Get()
   findAll() {
-    return this.trackService.findAll().map((track) => track.toDto());
+    return this.trackService.findAll();
   }
 
   @Get(':id')
   findOne(@Param() params: FindOneParams) {
-    return this.trackService.findOne(params.id).toDto();
+    return this.trackService.findOne(params.id);
   }
 
   @Put(':id')
@@ -40,7 +40,7 @@ export class TrackController {
     @Param() params: FindOneParams,
     @Body() updateTrackDto: UpdateTrackDto,
   ) {
-    return this.trackService.update(params.id, updateTrackDto).toDto();
+    return this.trackService.update(params.id, updateTrackDto);
   }
 
   @Delete(':id')

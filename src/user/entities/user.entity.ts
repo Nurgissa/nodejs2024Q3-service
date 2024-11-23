@@ -1,48 +1,73 @@
-import { getRandomId } from '../../utils';
 import { ForbiddenException } from '@nestjs/common';
 import { UserDto } from '../dto/user.dto';
 
 export class User {
-  private readonly id: string;
-  private readonly login: string;
-  private password: string;
-  private version: number;
-  private readonly createdAt: number;
-  private updateAt: number;
+  #id: string;
+  #login: string;
+  #password: string;
+  #version: number;
+  #createdAt?: Date;
+  #updatedAt?: Date;
 
-  constructor(login: string, password: string) {
-    this.id = getRandomId();
-    this.login = login;
-    this.password = password;
-    this.version = 1;
+  constructor(
+    id: string,
+    login: string,
+    password: string,
+    version?: number,
+    createdAt?: Date,
+    updatedAt?: Date,
+  ) {
+    this.#id = id;
+    this.#login = login;
+    this.#password = password;
+    this.#version = version || 1;
 
-    const now = Date.now();
-    this.createdAt = now;
-    this.updateAt = now;
+    this.#createdAt = createdAt || new Date();
+    this.#updatedAt = updatedAt || new Date();
   }
 
   getId(): string {
-    return this.id;
+    return this.#id;
+  }
+
+  getPassword(): string {
+    return this.#password;
   }
 
   updatePassword(oldPassword: string, newPassword: string) {
-    if (this.password !== oldPassword) {
-      // TODO: change to entity specific error
+    if (this.#password !== oldPassword) {
       throw new ForbiddenException('Passwords do not match');
     }
 
-    this.password = newPassword;
-    this.updateAt = Date.now();
-    this.version++;
+    this.#version++;
+    this.#password = newPassword;
   }
 
   toDto(): UserDto {
     return {
-      id: this.id,
-      login: this.login,
-      version: this.version,
-      createdAt: this.createdAt,
-      updatedAt: this.updateAt,
+      id: this.#id,
+      login: this.#login,
+      version: this.#version,
+      createdAt: this.#createdAt.getTime(),
+      updatedAt: this.#updatedAt.getTime(),
     };
+  }
+
+  static toEntity({
+    id,
+    login,
+    password,
+    version,
+    createdAt,
+    updatedAt,
+  }: {
+    id: string;
+    login: string;
+    password: string;
+    version: number;
+    createdAt: Date;
+    updatedAt: Date;
+  }) {
+    return new User(id, login, password, version, createdAt, updatedAt);
   }
 }

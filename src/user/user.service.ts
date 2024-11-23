@@ -1,40 +1,66 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
-  #map = new Map<string, User>();
+  constructor(private readonly userRepository: UserRepository) {}
 
-  create(dto: CreateUserDto) {
-    const user = new User(dto.login, dto.password);
-    this.#map.set(user.getId(), user);
-    return user;
-  }
-
-  findOneId(id: string) {
-    return this.#map.get(id);
-  }
-
-  findAll() {
-    return Array.from(this.#map.values());
-  }
-
-  update(id: string, dto: UpdatePasswordDto) {
-    const user = this.#map.get(id);
-    if (!user) {
-      throw new NotFoundException('User not found');
+  async create(dto: CreateUserDto) {
+    try {
+      const created = await this.userRepository.create(
+        new User('dummy-id', dto.login, dto.password),
+      );
+      return created.toDto();
+    } catch (error) {
+      throw new UnprocessableEntityException(error.message);
     }
-
-    user.updatePassword(dto.oldPassword, dto.newPassword);
-    return user;
   }
 
-  delete(id: string) {
-    if (!this.#map.has(id)) {
-      throw new NotFoundException('User not found');
+  async findOne(id: string) {
+    const found = await this.#findUser(id);
+    return found.toDto();
+  }
+
+  async findAll() {
+    const list = await this.userRepository.findAll();
+    return list.map((user) => user.toDto());
+  }
+
+  async update(id: string, dto: UpdatePasswordDto) {
+    const user = await this.#findUser(id);
+
+    try {
+      user.updatePassword(dto.oldPassword, dto.newPassword);
+      const updated = await this.userRepository.update(id, user);
+      return updated.toDto();
+    } catch (error) {
+      throw new ForbiddenException(error.message);
     }
-    return this.#map.delete(id);
+  }
+
+  async delete(id: string) {
+    try {
+      const found = await this.#findUser(id);
+      const deleted = await this.userRepository.delete(found.getId());
+      return deleted.toDto();
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  async #findUser(id: string) {
+    try {
+      return await this.userRepository.findOne(id);
+    } catch (error) {
+      throw new NotFoundException(`User with id:${id} not found`);
+    }
   }
 }

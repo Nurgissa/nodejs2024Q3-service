@@ -10,4 +10,6 @@ export class CreateTrackDto {
   artistId: string | null;
 
   albumId: string | null;
+
+  liked?: boolean;
 }
