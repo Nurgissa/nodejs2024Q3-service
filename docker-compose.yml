@@ -11,6 +11,8 @@ services:
       - '5432:5432'
     env_file:
       - .env
+    networks:
+      custom-network:
 
   home-library-service:
     image: nurgisa/home-library-service:2.0
@@ -21,12 +23,18 @@ services:
       - .env
     depends_on:
       - database
+    networks:
+      custom-network:
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8080:8080
+    networks:
+      custom-network:
 
 volumes:
   database_data:
+networks:
+  custom-network:
