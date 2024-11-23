@@ -15,7 +15,7 @@ services:
       custom-network:
 
   home-library-service:
-    image: nurgisa/home-library-service:3.0
+    image: nurgisa/home-library-service:3.1
     restart: always
     ports:
       - '4000:4000'
