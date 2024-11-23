@@ -1,0 +1,43 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+  database:
+    image: nurgisa/postgresql:latest
+    restart: always
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    networks:
+      custom-network:
+
+  home-library-service:
+    build:
+      dockerfile: ./Dockerfile-dev
+    restart: always
+    ports:
+      - '4000:4000'
+    env_file:
+      - .env
+    depends_on:
+      - database
+    networks:
+      custom-network:
+    volumes:
+      - ./src:/app/src
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
+    networks:
+      custom-network:
+
+volumes:
+  database_data:
+networks:
+  custom-network:
