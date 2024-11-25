@@ -11,6 +11,7 @@ import { FavoriteTrackModule } from './favorite/track/favorite-track.module';
 import { FavoriteArtistModule } from './favorite/artist/favorite-artist.module';
 import { FavoriteAlbumModule } from './favorite/album/favorite-album.module';
 import { JsonContentTypeMiddleware } from './json-content-type.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { JsonContentTypeMiddleware } from './json-content-type.middleware';
         ],
       },
     ]),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, JsonContentTypeMiddleware],

@@ -29,6 +29,10 @@ export class UserService {
     return found.toDto();
   }
 
+  async findOneByUsername(username: string) {
+    return this.userRepository.findOneByUsername(username);
+  }
+
   async findAll() {
     const list = await this.userRepository.findAll();
     return list.map((user) => user.toDto());
