@@ -22,7 +22,11 @@ export class AuthService {
       throw new UnauthorizedException('User already exists');
     }
 
-    const passwordHash = await getBcryptHash(dto.password);
+    const passwordHash = await getBcryptHash(
+      dto.password,
+      +jwtConstants.cryptSalt,
+    );
+
     return this.userService.create({
       login: dto.login,
       password: passwordHash,
@@ -51,8 +55,8 @@ export class AuthService {
       login: dto.login,
     };
     return {
-      access_token: await this.jwtService.signAsync(payload),
-      refresh_token: await this.jwtService.signAsync(payload, {
+      accessToken: await this.jwtService.signAsync(payload),
+      refreshToken: await this.jwtService.signAsync(payload, {
         secret: jwtConstants.refreshSecret,
         expiresIn: jwtConstants.refreshTokenExpireTime,
       }),

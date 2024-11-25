@@ -7,4 +7,5 @@ export const jwtConstants = {
     'XwFeLtQbu6hzZePLDeozB3s7Uq0Hy3TJ26UBQ66T',
   tokenExpireTime: process.env.JWT_REFRESH_TOKEN_EXPIRE || '1h',
   refreshTokenExpireTime: process.env.JWT_REFRESH_TOKEN_EXPIRE || '24h',
+  cryptSalt: process.env.CRYPT_SALT || '10',
 };

@@ -1,7 +1,10 @@
 import * as bcrypt from 'bcrypt';
 
-export const getBcryptHash = async (password: string) => {
-  return bcrypt.hash(password, 13);
+export const getBcryptHash = async (
+  password: string,
+  hashingComplexityLevel = 10,
+) => {
+  return bcrypt.hash(password, hashingComplexityLevel);
 };
 
 export const isSamePassword = async (password: string, hash: string) => {
