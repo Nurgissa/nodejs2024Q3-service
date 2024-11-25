@@ -24,8 +24,6 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "docker:scan": "docker scout quickview",
-    "docker:dev:up": "docker-compose -f ./docker-compose-dev.yml up",
-    "docker:dev:down": "docker-compose -f ./docker-compose-dev.yml down",
     "docker:prod:up": "docker-compose up -d",
     "docker:prod:down": "docker-compose down"
   },
