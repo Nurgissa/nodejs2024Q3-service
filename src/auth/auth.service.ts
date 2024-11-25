@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { TokenRefreshDto } from './dto/token-refresh.dto';
 import { UserService } from '../user/user.service';
 import { getBcryptHash, isSamePassword } from './utils';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +41,7 @@ export class AuthService {
     );
 
     if (!isSame) {
-      throw new UnauthorizedException(`Incorrect user credentials`);
+      throw new ForbiddenException(`Incorrect user credentials`);
     }
 
     const payload = { sub: existingUser.getId(), username: dto.login };
