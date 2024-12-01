@@ -1,12 +1,15 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { PublicRoute } from './auth/decorators/public-route.decorator';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  @PublicRoute()
   @Get()
   getHello(): string {
+    // throw new Error('custom-error');
     return this.appService.getHello();
   }
 }
