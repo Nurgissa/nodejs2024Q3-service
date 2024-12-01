@@ -54,6 +54,15 @@ export class UserRepository implements IRepository<User> {
     return User.toEntity(found);
   }
 
+  async findOneByUsername(username: string): Promise<User | null> {
+    const found = await this.prismaService.user.findUnique({
+      where: {
+        login: username,
+      },
+    });
+    return found ? User.toEntity(found) : null;
+  }
+
   async update(id: string, entity: User): Promise<User> {
     const dto = entity.toDto();
     const updated = await this.prismaService.user.update({

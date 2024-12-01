@@ -6,11 +6,15 @@ import { ArtistModule } from './artist/artist.module';
 import { AlbumModule } from './album/album.module';
 import { TrackModule } from './track/track.module';
 import { FavoriteModule } from './favorite/favorite.module';
-import { RouterModule } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, RouterModule } from '@nestjs/core';
 import { FavoriteTrackModule } from './favorite/track/favorite-track.module';
 import { FavoriteArtistModule } from './favorite/artist/favorite-artist.module';
 import { FavoriteAlbumModule } from './favorite/album/favorite-album.module';
 import { JsonContentTypeMiddleware } from './json-content-type.middleware';
+import { AuthModule } from './auth/auth.module';
+import { CustomExceptionFilter } from './custom-exception.filter';
+import { LoggerModule } from './logger/logger.module';
+import { LoggingInterceptor } from './logging.interceptor';
 
 @Module({
   imports: [
@@ -42,8 +46,21 @@ import { JsonContentTypeMiddleware } from './json-content-type.middleware';
         ],
       },
     ]),
+    AuthModule,
+    LoggerModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JsonContentTypeMiddleware],
+  providers: [
+    AppService,
+    JsonContentTypeMiddleware,
+    {
+      provide: APP_FILTER,
+      useClass: CustomExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}
